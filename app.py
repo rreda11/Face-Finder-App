@@ -77,27 +77,31 @@ def download_yolo_model(model_url, model_path):
 def load_yolo_model():
     """Load YOLO face detection model"""
     try:
-        # First try to import ultralytics
         try:
             from ultralytics import YOLO
         except ImportError:
             st.error("Ultralytics package not installed. Please run: pip install ultralytics")
             return None
-        
-        # Model URL and path
+
         model_url = "https://github.com/akanametov/yolov8-face/releases/download/v0.0.0/yolov8n-face.pt"
         model_path = "yolov8n-face.pt"
-        
-        # Download model if needed
+
         if not download_yolo_model(model_url, model_path):
             return None
-        
-        # Load the model
-        model = YOLO(model_path)
-        st.success("YOLO model loaded successfully!")
-        return model
+
+        try:
+            model = YOLO(model_path)
+            st.success("YOLO model loaded successfully!")
+            return model
+        except Exception as e:
+            if "weights_only" in str(e) or "WeightsUnpickler" in str(e):
+                st.error("Error loading YOLO model: PyTorch 2.6+ restricts loading some models. If you trust the source, try re-downloading 'yolov8n-face.pt' or use Ultralytics >=8.1.0. If the error persists, delete 'yolov8n-face.pt' and let the app re-download it.")
+                st.error(e)
+            else:
+                st.error(f"Error loading YOLO model: {e}")
+            return None
     except Exception as e:
-        st.error(f"Error loading YOLO model: {e}")
+        st.error(f"Unexpected error loading YOLO model: {e}")
         return None
 
 def detect_faces_yolo(_model, img_path, confidence_threshold=0.5):
@@ -429,9 +433,9 @@ def main():
             
             if query_face_detected:
                 st.session_state.query_face = query_face_crop
-                st.image(query_face_detected, caption="Detected Face", use_container_width=True)
+                st.image(query_face_detected, caption="Detected Face")
             else:
-                st.image(query_image, caption="Original Image (No Face Detected)", use_container_width=True)
+                st.image(query_image, caption="Original Image (No Face Detected)")
             
             # Process button
             if st.button("Find Similar Faces", type="primary"):
@@ -464,7 +468,7 @@ def main():
                     with cols[i % 3]:
                         try:
                             # Display the image with face detection
-                            st.image(face_img, use_container_width=True)
+                            st.image(face_img)
                                 
                             similarity = 1 - distance  # Convert distance to similarity score
                             st.markdown(f"""
