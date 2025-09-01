@@ -1,8 +1,8 @@
-streamlit>=1.36.0
-tensorflow==2.20.0
-numpy>=1.26.0
-matplotlib>=3.9.0
-Pillow>=10.3.0
+streamlit>=1.36
+tensorflow==2.15.0
+numpy>=1.23,<1.27
+matplotlib>=3.7,<3.9
+Pillow>=10.0,<11
 opencv-python==4.9.0.80
 requests==2.31.0
 tqdm==4.66.2
